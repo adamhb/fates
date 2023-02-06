@@ -44,6 +44,7 @@ module FatesLitterMod
    implicit none
    private
 
+   public :: adjust_SF_CWD_frac
 
    integer, public, parameter :: ncwd  = 4    ! number of coarse woody debris pools 
                                               ! (twig,s branch,l branch, trunk)
@@ -57,7 +58,6 @@ module FatesLitterMod
 
 
    type, public ::  litter_type
-
       
       ! This object is allocated for each element (C, N, P, etc) that we wish to track.
 
@@ -424,6 +424,67 @@ contains
     
     return
   end function GetTotalLitterMass
+  
+  ! =====================================================
 
+  subroutine adjust_SF_CWD_frac(dbh,ncwd,SF_val_CWD_frac,SF_val_CWD_frac_adj)
+     
+     !DESCRIPTION
+     !Adjust  the partitioning of struct + sawp into cwd pools based on 
+     !cohort dbh. This avoids struct and sapw from small cohorts going to
+     !fuel classes that are too large. Instead, struct + sapw go to the cwd
+     !class based on established fuel class diameter thresholds (Fosberg et al., 1971;
+     !Rothermel, 1983)
+
+     !ARGUMENTS
+     real(r8), intent(in)               :: dbh !dbh of cohort
+     type(integer), intent(in)          :: ncwd !number of cwd pools
+     real(r8), intent(in)               :: SF_val_CWD_frac(:)
+     real(r8), intent(out)              :: SF_val_CWD_frac_adj(:)
+     !
+     !LOCAL VARIABLES
+     !These diameter ranges are based on work by Fosberg et al., 1971 
+     
+     real(r8), parameter :: lb_max_diam        = 7.6 !max diameter [cm] for large branch
+     real(r8), parameter :: sb_max_diam        = 2.5 !max diameter [cm] for small branch
+     real(r8), parameter :: twig_max_diam      = 0.6 !max diameter [cm] for twig
+     !------------------------------------------------------------------------------------
+
+     
+     SF_val_CWD_frac_adj = SF_val_CWD_frac
+     
+     !If dbh is larger than max size of a large branch (1,000 hr) then we don't change
+     !how biomass is partitioned among cwd classes.
+     if (dbh > lb_max_diam) then
+        return
+
+     !When dbh is greater than the max size of a small branch (10 hr) but less than or 
+     !equal to the max size of a large branch we send the biomass that would have
+     !gone to trunk fuel to large branch fuel (100 hr) instead.
+     else if (dbh > sb_max_diam .and. dbh .le. lb_max_diam) then
+        SF_val_CWD_frac_adj(ncwd) = 0.0
+        SF_val_CWD_frac_adj(ncwd-1) = SF_val_CWD_frac(ncwd)
+	SF_val_CWD_frac_adj(ncwd-2) = SF_val_CWD_frac(ncwd-1)
+	SF_val_CWD_frac_adj(ncwd-3) = sum(SF_val_CWD_frac((ncwd-3):(ncwd-2)))
+
+     !When dbh is greater than the max size of a twig (1 hr) but less than or 
+     !equal to the max size of a small branch (10 hr) we send the biomass that would have
+     !gone to trunk fuel and large branch fuel to small branch fuel instead.
+     else if (dbh > twig_max_diam .and. dbh .le. sb_max_diam) then
+        SF_val_CWD_frac_adj(ncwd) = 0.0
+        SF_val_CWD_frac_adj(ncwd-1) = 0.0
+        SF_val_CWD_frac_adj(ncwd-2) = SF_val_CWD_frac(ncwd)
+	SF_val_CWD_frac_adj(ncwd-3) = sum(SF_val_CWD_frac((ncwd-3):(ncwd-1)))
+     
+     !If dbh is less than or equal to the max size of a twig we send all 
+     !biomass to twigs
+     else if (dbh .le. twig_max_diam) then
+        SF_val_CWD_frac_adj(ncwd) = 0.0
+        SF_val_CWD_frac_adj(ncwd-1) = 0.0
+	SF_val_CWD_frac_adj(ncwd-2) = 0.0
+	SF_val_CWD_frac_adj(ncwd-3) = sum(SF_val_CWD_frac)
+
+     endif 
+  end subroutine adjust_SF_CWD_frac
   
 end module FatesLitterMod
