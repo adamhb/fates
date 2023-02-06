@@ -133,6 +133,7 @@ Module EDCohortDynamicsMod
   public :: DeallocateCohort
   public :: EvaluateAndCorrectDBH
   public :: DamageRecovery
+  public :: RefreshResproutFlag
   
   logical, parameter :: debug  = .false. ! local debug flag
 
@@ -547,6 +548,7 @@ contains
     ! VEGETATION STRUCTURE
     currentCohort%pft                = fates_unset_int  ! pft number
     currentCohort%crowndamage        = fates_unset_int  ! Crown damage class
+    currentCohort%resprout           = fates_unset_int  ! resprout vs. from seed
     currentCohort%indexnumber        = fates_unset_int  ! unique number for each cohort. (within clump?)
     currentCohort%canopy_layer       = fates_unset_int  ! canopy status of cohort (1 = canopy, 2 = understorey, etc.)
     currentCohort%canopy_layer_yesterday       = nan  ! recent canopy status of cohort (1 = canopy, 2 = understorey, etc.)
@@ -643,6 +645,7 @@ contains
     currentCohort%cambial_mort          = nan ! probability that trees dies due to cambial char P&R (1986)
     currentCohort%crownfire_mort        = nan ! probability of tree post-fire mortality due to crown scorch
     currentCohort%fire_mort             = nan ! post-fire mortality from cambial and crown damage assuming two are independent
+    currentCohort%frac_resprout         = nan ! post-fire mortality from cambial and crown damage assuming two are independent
 
   end subroutine nan_cohort
 
@@ -674,6 +677,7 @@ contains
     currentCohort%livestem_mr        = 0._r8
     currentCohort%livecroot_mr       = 0._r8
     currentCohort%froot_mr           = 0._r8
+    currentCohort%frac_resprout      = 0._r8
     currentCohort%fire_mort          = 0._r8
     currentcohort%npp_acc            = 0._r8
     currentcohort%gpp_acc            = 0._r8
@@ -1207,6 +1211,9 @@ contains
 
                              ! check cohorts have same damage class before fusing
                              if (currentCohort%crowndamage == nextc%crowndamage) then
+                            
+                             ! check cohorts have the same resprout status before fusing
+                             if (currentCohort%resprout == nextc%resprout) then
 
                              ! check cohorts in same c. layer. before fusing
 
@@ -1235,6 +1242,7 @@ contains
                                       write(fates_log(),*) 'dbh:',currentCohort%dbh,nextc%dbh
                                       write(fates_log(),*) 'pft:',currentCohort%pft,nextc%pft
                                       write(fates_log(),*) 'crowndamage:',currentCohort%crowndamage,nextc%crowndamage
+                                      write(fates_log(),*) 'resprout:',currentCohort%resprout,nextc%resprout
                                       write(fates_log(),*) 'canopy_trim:',currentCohort%canopy_trim,nextc%canopy_trim
                                       write(fates_log(),*) 'canopy_layer_yesterday:', &
                                            currentCohort%canopy_layer_yesterday,nextc%canopy_layer_yesterday
@@ -1462,6 +1470,10 @@ contains
 
                                       currentCohort%fire_mort      = (currentCohort%n*currentCohort%fire_mort   + &
                                            nextc%n*nextc%fire_mort)/newn
+ 
+                                      currentCohort%frac_resprout      = (currentCohort%n*currentCohort%frac_resprout   + &
+                                           nextc%n*nextc%frac_resprout)/newn
+
 
                                       ! mortality diagnostics
                                       currentCohort%cmort = (currentCohort%n*currentCohort%cmort + nextc%n*nextc%cmort)/newn
@@ -1570,6 +1582,7 @@ contains
 
                                 endif ! if( currentCohort%isnew.eqv.nextc%isnew ) then
                              endif !canopy layer
+                             endif ! resprout
                              endif ! crowndamage 
                           endif !pft
                        endif  !index no.
@@ -1845,6 +1858,7 @@ contains
     ! VEGETATION STRUCTURE
     n%pft             = o%pft
     n%crowndamage     = o%crowndamage
+    n%resprout        = o%resprout
     n%n               = o%n
     n%dbh             = o%dbh
     n%coage           = o%coage
@@ -1960,6 +1974,7 @@ contains
     ! FIRE
     n%fraction_crown_burned = o%fraction_crown_burned
     n%fire_mort             = o%fire_mort
+    n%frac_resprout         = o%frac_resprout
     n%crownfire_mort        = o%crownfire_mort
     n%cambial_mort          = o%cambial_mort
 
@@ -2419,5 +2434,37 @@ contains
     return
   end subroutine DamageRecovery
   
+  subroutine RefreshResproutFlag(currentCohort)
+
+     !DESCRIPTION
+     !Check if the resprout should no longer be considered a resprout
+     !based on how close its fine root carbon pool is to target
+
+     !USES
+     use FatesAllometryMod, only : bfineroot 
+     
+     !ARGUMENTS
+     type(ed_cohort_type), intent(inout) :: currentCohort
+
+
+     !LOCAL VARIABLES
+     real(r8) :: target_fnrt_c !target fine root carbon pool [kg]
+     real(r8) :: fnrt_c !actual fine root carbon pool [kg]
+
+
+     call bfineroot(currentCohort%dbh,currentCohort%pft,&
+          currentCohort%canopy_trim,currentCohort%l2fr,target_fnrt_c)
+
+     fnrt_c = currentCohort%prt%GetState(fnrt_organ,carbon12_element)
+     
+     !If actual fine root carbon is within 3% of target then the cohort
+     !loses its resprout flag is in considered to be witin the range of
+     !non-resprouting allometry.
+
+     if ((fnrt_c - target_fnrt_c) / fnrt_c < 0.03_r8) then
+        currentCohort%resprout = 0
+     endif
+
+  end subroutine RefreshResproutFlag
 
 end module EDCohortDynamicsMod

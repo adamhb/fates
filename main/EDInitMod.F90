@@ -768,7 +768,7 @@ contains
 
     patch_in%tallest  => null()
     patch_in%shortest => null()
-
+    
     ! Manage interactions of fixed biogeog (site level filter) and
     ! nocomp (patch level filter)
     ! Need to cover all potential biogeog x nocomp combinations
@@ -817,7 +817,10 @@ contains
 
              ! Assume no damage to begin with - since we assume no damage
              ! we do not need to initialise branch frac just yet. 
-             temp_cohort%crowndamage = 1
+             temp_cohort%crowndamage = 1 
+
+             ! Cohorts initialized on bare ground are not resprouts
+             temp_cohort%resprout = 0
 
              !  h,dbh,leafc,n from SP values or from small initial size.
              if(hlm_use_sp.eq.itrue)then
@@ -883,7 +886,7 @@ contains
              end if ! SP mode
 
              if ( debug ) write(fates_log(),*) 'EDInitMod.F90 call create_cohort '
-
+             
              temp_cohort%coage = 0.0_r8
 
 

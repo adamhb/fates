@@ -41,6 +41,9 @@ module EDTypesMod
   real(r8), parameter, public :: init_recruit_trim = 0.8_r8    ! This is the initial trimming value that
                                                                ! new recruits start with
 
+  real(r8), parameter, public :: store_c_ratio_ag2bg = 0.57_r8   !Storage carbon concentration ratio between
+                                                             !above-ground and below-ground organs
+							     !in resprouters
   ! -------------------------------------------------------------------------------------
   ! Radiation parameters
   ! These should be part of the radiation module, but since we only have one option
@@ -395,6 +398,10 @@ module EDTypesMod
      real(r8) ::  crownfire_mort                         ! probability of tree post-fire mortality 
                                                          ! due to crown scorch (conditional on the tree being subjected to the fire)
      real(r8) ::  fire_mort                              ! post-fire mortality from cambial and crown damage assuming two are independent:-
+     integer  ::  resprout                               ! flag to indicate if the cohort is a post-fire resprout
+     real(r8) ::  frac_resprout                          ! what fraction of the cohort resprouts in response to fire damage
+     
+
 
      ! Hydraulics
      type(ed_cohort_hydr_type), pointer :: co_hydr       ! All cohort hydraulics data, see FatesHydraulicsMemMod.F90
@@ -1167,6 +1174,8 @@ module EDTypesMod
      write(fates_log(),*) 'co%dbdeaddt               = ', ccohort%dbdeaddt
      write(fates_log(),*) 'co%fraction_crown_burned  = ', ccohort%fraction_crown_burned
      write(fates_log(),*) 'co%fire_mort              = ', ccohort%fire_mort
+     write(fates_log(),*) 'co%frac_resprout          = ', ccohort%frac_resprout
+     write(fates_log(),*) 'co%resprout               = ', ccohort%resprout
      write(fates_log(),*) 'co%crownfire_mort         = ', ccohort%crownfire_mort
      write(fates_log(),*) 'co%cambial_mort           = ', ccohort%cambial_mort
      write(fates_log(),*) 'co%size_class             = ', ccohort%size_class
