@@ -1759,7 +1759,7 @@ contains
     !
     ! !ARGUMENTS
     type(ed_cohort_type) , intent(in), pointer :: pcc
-    type(ed_cohort_type) , intent(in), pointer :: ptall
+    type(ed_cohort_type) , intent(inout), pointer :: ptall
     type(ed_cohort_type) , intent(inout), pointer :: pshort
     integer              , intent(in)                     :: tnull
     integer              , intent(in)                     :: snull

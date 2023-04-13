@@ -821,7 +821,6 @@ contains
           temp_cohort%crowndamage = 1  ! Assume no damage to begin with
           temp_cohort%resprout = 0  ! Cohorts initialized on bare ground are not resprouts
 
-
           ! If positive EDPftvarcon_inst%initd is interpreted as initial recruit density.
           ! If negative EDPftvarcon_inst%initd is interpreted as initial dbh. 
           ! Dbh-initialization can only be used in nocomp mode.
@@ -839,7 +838,6 @@ contains
                 ! n.b. that this is the same as currentcohort%n = %initd(pft) &AREA
                 temp_cohort%n           =  temp_cohort%n * sum(site_in%use_this_pft)
              endif
-             
              
              !  h,dbh,leafc,n from SP values or from small initial size.
              if(hlm_use_sp.eq.itrue)then
