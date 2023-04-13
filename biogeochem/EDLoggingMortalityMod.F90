@@ -768,7 +768,10 @@ contains
       integer  :: ilyr                   ! soil layer loop index
       integer  :: el                     ! elemend loop index
       real(r8) :: SF_val_CWD_frac_adj(4) !Updated wood partitioning to CWD based on dbh
+<<<<<<< HEAD
       
+=======
+>>>>>>> cwd_partitioning
 
       nlevsoil = currentSite%nlevsoil
 
@@ -920,7 +923,7 @@ contains
                   (1._r8 - prt_params%allom_agb_frac(currentCohort%pft))
 
             new_litt%ag_cwd(ncwd) = new_litt%ag_cwd(ncwd) + ag_wood * &
-                 SF_val_CWD_frac_adj(ncwd) * donate_m2
+                  SF_val_CWD_frac_adj(ncwd) * donate_m2
 
             cur_litt%ag_cwd(ncwd) = cur_litt%ag_cwd(ncwd) + ag_wood * &
                   SF_val_CWD_frac_adj(ncwd) * retain_m2
