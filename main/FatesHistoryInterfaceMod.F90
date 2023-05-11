@@ -580,6 +580,7 @@ module FatesHistoryInterfaceMod
   integer :: ih_gpp_si_pft
   integer :: ih_gpp_sec_si_pft
   integer :: ih_npp_si_pft
+  integer :: ih_seed_bank_si_pft
   integer :: ih_npp_sec_si_pft
   integer :: ih_nocomp_pftpatchfraction_si_pft
   integer :: ih_nocomp_pftnpatches_si_pft
@@ -2241,6 +2242,7 @@ end subroutine flush_hvars
                hio_gpp_si_pft  => this%hvars(ih_gpp_si_pft)%r82d, &
                hio_gpp_sec_si_pft      => this%hvars(ih_gpp_sec_si_pft)%r82d, &
                hio_npp_si_pft  => this%hvars(ih_npp_si_pft)%r82d, &
+               hio_seed_bank_si_pft  => this%hvars(ih_seed_bank_si_pft)%r82d, &
                hio_npp_sec_si_pft      => this%hvars(ih_npp_sec_si_pft)%r82d, &
                hio_nesterov_fire_danger_si => this%hvars(ih_nesterov_fire_danger_si)%r81d, &
                hio_fire_nignitions_si => this%hvars(ih_fire_nignitions_si)%r81d, &
@@ -3983,6 +3985,7 @@ end subroutine flush_hvars
 
       hio_litter_out_si(io_si) = 0._r8
       hio_seed_bank_si(io_si)  = 0._r8
+      hio_seed_bank_si_pft(io_si,:)  = 0._r8
       hio_seeds_in_si(io_si)   = 0._r8
 
       cpatch => sites(s)%oldest_patch
@@ -4006,6 +4009,13 @@ end subroutine flush_hvars
          hio_seed_bank_si(io_si) = hio_seed_bank_si(io_si) + &
             (sum(litt%seed(:))+sum(litt%seed_germ(:))) * &
             area_frac
+
+         
+         ! Sum up pft-specific seed bank (ungerminated only)
+         do i_pft = 1, numpft 
+         hio_seed_bank_si_pft(io_si,i_pft) = hio_seed_bank_si_pft(io_si,i_pft) + &
+            (litt%seed(i_pft) * area_frac)
+         end do
 
          ! Sum up the input flux into the seed bank (local and external)
          hio_seeds_in_si(io_si) = hio_seeds_in_si(io_si) + &
@@ -5467,6 +5477,12 @@ end subroutine update_history_hifrq
          use_default='active', avgflag='A', vtype=site_pft_r8, hlms='CLM:ALM', &
          upfreq=1, ivar=ivar, initialize=initialize_variables,                 &
          index=ih_npp_si_pft)
+   
+    call this%set_history_var(vname='FATES_SEEDBANK_PF', units='kg m-2',       &
+         long='total mass of seeds in the seed bank',  &
+         use_default='active', avgflag='A', vtype=site_pft_r8, hlms='CLM:ALM', &
+         upfreq=1, ivar=ivar, initialize=initialize_variables,                 &
+         index=ih_seed_bank_si_pft)
 
     call this%set_history_var(vname='FATES_GPP_SE_PF', units='kg m-2 s-1',        &
          long='total PFT-level GPP in kg carbon per m2 land area per second, secondary patches',  &
