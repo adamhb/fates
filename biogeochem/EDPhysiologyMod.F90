@@ -426,7 +426,7 @@ contains
        ! Calculate seed germination rate, the status flags prevent
        ! germination from occuring when the site is in a drought
        ! (for drought deciduous) or too cold (for cold deciduous)
-       call SeedGermination(litt, currentSite%cstatus, currentSite%dstatus)
+       call SeedGermination(litt, currentSite%cstatus, currentSite%dstatus, currentPatch )
 
        ! Send fluxes from newly created litter into the litter pools
        ! This litter flux is from non-disturbance inducing mortality, as well
@@ -1916,7 +1916,7 @@ contains
   end subroutine SeedDecay
 
   ! ============================================================================
-  subroutine SeedGermination( litt, cold_stat, drought_stat )
+  subroutine SeedGermination( litt, cold_stat, drought_stat, currentPatch )
     !
     ! !DESCRIPTION:
     !  Flux from seed pool into sapling pool
@@ -1928,12 +1928,13 @@ contains
     type(litter_type) :: litt
     integer, intent(in) :: cold_stat    ! Is the site in cold leaf-off status?
     integer, intent(in) :: drought_stat ! Is the site in drought leaf-off status?
+    type(ed_patch_type), intent(in) :: currentPatch
     !
     ! !LOCAL VARIABLES:
     integer :: pft
 
 
-    real(r8), parameter ::  max_germination = 1.0_r8 ! Cap on germination rates.
+    real(r8), parameter ::  max_germination = 1000.0_r8 ! Cap on germination rates.
     ! KgC/m2/yr Lishcke et al. 2009
 
     ! Turning of this cap? because the cap will impose changes on proportionality
@@ -1951,6 +1952,14 @@ contains
     do pft = 1,numpft
        litt%seed_germ_in(pft) =  min(litt%seed(pft) * EDPftvarcon_inst%germination_rate(pft), &
             max_germination)*years_per_day
+
+       if (prt_params%allom_dbh_maxheight(pft) < 20.0_r8 .and. currentPatch%age < 2.0_r8) then
+          litt%seed_germ_in(pft) =  min(litt%seed(pft) * EDPftvarcon_inst%germination_rate(pft) * 100.0_r8, &
+                      max_germination)*years_per_day
+
+         ! write(fates_log(),*) '10X germination for:', pft
+
+       end if
 
        !set the germination only under the growing season...c.xu
 
