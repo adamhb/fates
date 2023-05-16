@@ -1957,7 +1957,7 @@ contains
           litt%seed_germ_in(pft) =  min(litt%seed(pft) * EDPftvarcon_inst%germination_rate(pft) * 100.0_r8, &
                       max_germination)*years_per_day
 
-         ! write(fates_log(),*) '10X germination for:', pft
+          write(fates_log(),*) '100X germination for:', pft
 
        end if
 
