@@ -1869,7 +1869,7 @@ contains
 
                 ! Seed input from the current patch
                 litt%seed_in_local(pft) = litt%seed_in_local(pft) + &
-                intra_patch_seed_rain(p,pft)/area
+                intra_patch_seed_rain(p,pft)/currentPatch%area
                 
                 write(fates_log(), *) 'intra_patch_seed_rain'
 
