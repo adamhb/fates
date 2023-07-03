@@ -515,6 +515,9 @@ variables:
 	double fates_recruit_seed_supplement(fates_pft) ;
 		fates_recruit_seed_supplement:units = "KgC/m2/yr" ;
 		fates_recruit_seed_supplement:long_name = "Supplemental external seed rain source term (non-mass conserving)" ;
+        double fates_recruit_inter_patch_disp_frac(fates_pft) ;
+                fates_recruit_inter_patch_disp_frac:units = "fraction" ;
+                fates_recruit_inter_patch_disp_frac:long_name = "fraction of seed that disperses to other patches within a site" ;
 	double fates_stoich_nitr(fates_plant_organs, fates_pft) ;
 		fates_stoich_nitr:units = "gN/gC" ;
 		fates_stoich_nitr:long_name = "target nitrogen concentration (ratio with carbon) of organs" ;
@@ -1063,6 +1066,8 @@ data:
 
  fates_frag_seed_decay_rate = 0.51, 0.51, 0.51, 0.51, 0.51, 0.51, 0.51, 0.51, 
     0.51, 0.51, 0.51, 0.51 ;
+
+ fates_recruit_inter_patch_disp_frac = 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ;
 
  fates_grperc = 0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 
     0.11, 0.11 ;

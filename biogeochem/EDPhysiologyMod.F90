@@ -77,6 +77,7 @@ module EDPhysiologyMod
   use EDParamsMod           , only : q10_mr
   use EDParamsMod           , only : q10_froz
   use EDParamsMod           , only : logging_export_frac
+  use EDParamsMod           , only : maxpatch_total
   use FatesPlantHydraulicsMod  , only : AccumulateMortalityWaterStorage
   use FatesConstantsMod     , only : itrue,ifalse
   use FatesConstantsMod     , only : calloc_abs_error
@@ -1774,10 +1775,9 @@ contains
     integer  :: n_litt_types           ! number of litter element types (c,n,p, etc)
     integer  :: el                     ! loop counter for litter element types
     integer  :: element_id             ! element id consistent with parteh/PRTGenericMod.F90
-    real(r8),dimension(10,maxpft) :: intra_patch_seed_rain !ahb
-    integer :: p                       ! loop counter for patch ahb
-    real(r8) :: intra_patch_seed_frac  ! fraction of seed that stays in patch of origin
-    real(r8), parameter :: inter_patch_disp_frac = 0.1_r8
+    real(r8),dimension(maxpatch_total,maxpft) :: intra_patch_seed_rain ! array to track seed that stays
+                                       ! in its patch of origin
+    integer :: ipatch                  ! loop counter for patch
     !------------------------------------------------------------------------------------
 
 
@@ -1785,7 +1785,8 @@ contains
 
        site_seed_rain(:) = 0._r8
 
-       intra_patch_seed_rain(:,:) = 0._r8 ! ahb
+       intra_patch_seed_rain(:,:) = 0._r8 ! this array temporarily holds seed that stays in the patch
+                                          ! where it was produced
        
        element_id = element_list(el)
 
@@ -1793,11 +1794,11 @@ contains
 
        ! Loop over all patches and sum up the seed input for each PFT
 
-       p = 0 ! ahb
+       ipatch = 0 
        currentPatch => currentSite%oldest_patch
        do while (associated(currentPatch))
           
-          p = p + 1
+          ipatch = ipatch + 1
           
           currentCohort => currentPatch%tallest
           do while (associated(currentCohort))
@@ -1827,15 +1828,13 @@ contains
              end if
 
 
-             !how much seed remains in the patch ahb
-             intra_patch_seed_frac = 1.0_r8 - inter_patch_disp_frac
-
-             intra_patch_seed_rain(p,pft) = intra_patch_seed_rain(p,pft) +&
-                (intra_patch_seed_frac * seed_prod * currentCohort%n)
+             !how much seed remains in the patch where it was produced
+             intra_patch_seed_rain(ipatch,pft) = intra_patch_seed_rain(ipatch,pft) +&
+                ( ( 1.0_r8 - EDPftvarcon_inst%inter_patch_disp_frac(pft) ) * seed_prod * currentCohort%n)
 
              !how much seed is distributed evenly over all patches (including the current patch)
              site_seed_rain(pft) = site_seed_rain(pft) +  &
-                  ( (inter_patch_disp_frac * seed_prod * currentCohort%n) +&
+                  ( (EDPftvarcon_inst%inter_patch_disp_frac(pft) * seed_prod * currentCohort%n) +&
                   store_m_to_repro)
 
              currentCohort => currentCohort%shorter
@@ -1856,11 +1855,11 @@ contains
        ! arrays
 
        ! Loop over all patches and sum up the seed input for each PFT
-       p = 0 !ahb
+       ipatch = 0 
        currentPatch => currentSite%oldest_patch
        do while (associated(currentPatch))
           
-          p = p + 1 ! ahb
+          ipatch = ipatch + 1 
           
           litt => currentPatch%litter(el)
           do pft = 1,numpft
@@ -1869,11 +1868,8 @@ contains
 
                 ! Seed input from the current patch
                 litt%seed_in_local(pft) = litt%seed_in_local(pft) + &
-                intra_patch_seed_rain(p,pft)/currentPatch%area
+                intra_patch_seed_rain(ipatch,pft)/currentPatch%area
                 
-                write(fates_log(), *) 'intra_patch_seed_rain'
-
-
                 ! Seed input from all patches within the site
                 litt%seed_in_local(pft) = litt%seed_in_local(pft) + site_seed_rain(pft)/area
 
