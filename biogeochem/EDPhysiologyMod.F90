@@ -1981,7 +1981,7 @@ contains
             max_germination)*years_per_day
 
        if (prt_params%allom_dbh_maxheight(pft) < 20.0_r8 .and. currentPatch%age < 2.0_r8) then
-          litt%seed_germ_in(pft) =  min(litt%seed(pft) * EDPftvarcon_inst%germination_rate(pft) * 100.0_r8, &
+          litt%seed_germ_in(pft) =  min(litt%seed(pft) * EDPftvarcon_inst%germination_rate(pft) * 10.0_r8, &
                       max_germination)*years_per_day
 
           !write(fates_log(),*) '100X germination for:', pft
