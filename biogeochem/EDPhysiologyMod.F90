@@ -1961,7 +1961,7 @@ contains
     integer :: pft
 
 
-    real(r8), parameter ::  max_germination = 1000.0_r8 ! Cap on germination rates.
+    real(r8), parameter ::  max_germination = 0.5_r8 ! Cap on germination rates.
     ! KgC/m2/yr Lishcke et al. 2009
 
     ! Turning of this cap? because the cap will impose changes on proportionality
@@ -1981,7 +1981,7 @@ contains
             max_germination)*years_per_day
 
        if (prt_params%allom_dbh_maxheight(pft) < 20.0_r8 .and. currentPatch%age < 2.0_r8) then
-          litt%seed_germ_in(pft) =  min(litt%seed(pft) * EDPftvarcon_inst%germination_rate(pft) * 10.0_r8, &
+          litt%seed_germ_in(pft) =  min(litt%seed(pft) * EDPftvarcon_inst%germination_rate(pft) * 50.0_r8, &
                       max_germination)*years_per_day
 
           !write(fates_log(),*) '100X germination for:', pft
