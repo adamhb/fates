@@ -108,6 +108,7 @@ module EDPftvarcon
      real(r8), allocatable :: seed_decay_rate(:)         ! Fraction of seed mass (both germinated and
                                                          ! ungerminated), decaying per year    (yr-1)
      real(r8), allocatable :: inter_patch_disp_frac(:)   ! Fraction of seed mass leaving patch where is was produced
+     real(r8), allocatable :: disturbance_germ(:)        ! Post-disturbance germination multiplier
      real(r8), allocatable :: trim_limit(:)              ! Limit to reductions in leaf area w stress (m2/m2)
      real(r8), allocatable :: trim_inc(:)                ! Incremental change in trimming function   (m2/m2)
      real(r8), allocatable :: rhol(:, :)                 ! Leaf reflectance; second dim: 1 = vis, 2 = nir
@@ -598,6 +599,10 @@ contains
     call fates_params%RegisterParameter(name=name, dimension_shape=dimension_shape_1d, &
          dimension_names=dim_names, lower_bounds=dim_lower_bound)
 
+    name = 'fates_disturbance_germ'
+    call fates_params%RegisterParameter(name=name, dimension_shape=dimension_shape_1d, &
+         dimension_names=dim_names, lower_bounds=dim_lower_bound)
+
     name = 'fates_trim_limit'
     call fates_params%RegisterParameter(name=name, dimension_shape=dimension_shape_1d, &
           dimension_names=dim_names, lower_bounds=dim_lower_bound)
@@ -972,9 +977,9 @@ contains
     call fates_params%RetrieveParameterAllocate(name=name, &
          data=this%seed_decay_rate)
     
-    name = 'fates_recruit_inter_patch_disp_frac'
+    name = 'fates_disturbance_germ'
     call fates_params%RetrieveParameterAllocate(name=name, &
-         data=this%inter_patch_disp_frac)
+         data=this%disturbance_germ)
 
     name = 'fates_trim_limit'
     call fates_params%RetrieveParameterAllocate(name=name, &
@@ -1517,6 +1522,7 @@ contains
         write(fates_log(),fmt0) 'germination_timescale = ',EDPftvarcon_inst%germination_rate
         write(fates_log(),fmt0) 'seed_decay_turnover = ',EDPftvarcon_inst%seed_decay_rate
         write(fates_log(),fmt0) 'inter_patch_disp_frac = ',EDPftvarcon_inst%inter_patch_disp_frac
+        write(fates_log(),fmt0) 'disturbance_germ = ',EDPftvarcon_inst%disturbance_germ
         write(fates_log(),fmt0) 'trim_limit = ',EDPftvarcon_inst%trim_limit
         write(fates_log(),fmt0) 'trim_inc = ',EDPftvarcon_inst%trim_inc
         write(fates_log(),fmt0) 'rhol = ',EDPftvarcon_inst%rhol
