@@ -981,6 +981,10 @@ contains
     call fates_params%RetrieveParameterAllocate(name=name, &
          data=this%disturbance_germ)
 
+    name = 'fates_recruit_inter_patch_disp_frac'
+    call fates_params%RetrieveParameterAllocate(name=name, &
+         data=this%inter_patch_disp_frac)
+
     name = 'fates_trim_limit'
     call fates_params%RetrieveParameterAllocate(name=name, &
           data=this%trim_limit)
