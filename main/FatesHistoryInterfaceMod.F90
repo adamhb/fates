@@ -568,6 +568,7 @@ module FatesHistoryInterfaceMod
   integer :: ih_leafbiomass_si_pft
   integer :: ih_storebiomass_si_pft
   integer :: ih_nindivs_si_pft
+  integer :: ih_nindivs_resprout_si_pft
   integer :: ih_nindivs_sec_si_pft
   integer :: ih_recruitment_si_pft
   integer :: ih_mortality_si_pft
@@ -2230,6 +2231,7 @@ end subroutine flush_hvars
                hio_leafbiomass_si_pft  => this%hvars(ih_leafbiomass_si_pft)%r82d, &
                hio_storebiomass_si_pft => this%hvars(ih_storebiomass_si_pft)%r82d, &
                hio_nindivs_si_pft      => this%hvars(ih_nindivs_si_pft)%r82d, &
+               hio_nindivs_resprout_si_pft      => this%hvars(ih_nindivs_resprout_si_pft)%r82d, &
                hio_nindivs_sec_si_pft  => this%hvars(ih_nindivs_sec_si_pft)%r82d, &
                hio_recruitment_si_pft  => this%hvars(ih_recruitment_si_pft)%r82d, &
                hio_mortality_si_pft    => this%hvars(ih_mortality_si_pft)%r82d, &
@@ -2889,6 +2891,11 @@ end subroutine flush_hvars
 
                   hio_nindivs_si_pft(io_si,ft) = hio_nindivs_si_pft(io_si,ft) + &
                      ccohort%n * AREA_INV
+                  
+                  if (ccohort%resprout .eq. 1) then
+                     hio_nindivs_resprout_si_pft(io_si,ft) = hio_nindivs_resprout_si_pft(io_si,ft) + &
+                        ccohort%n * AREA_INV
+                  end if
 
                   if ( cpatch%anthro_disturbance_label .eq. secondaryforest ) then
                      hio_nindivs_sec_si_pft(io_si,ft) = hio_nindivs_sec_si_pft(io_si,ft) + &
@@ -5503,6 +5510,12 @@ end subroutine update_history_hifrq
          use_default='active', avgflag='A', vtype=site_pft_r8, hlms='CLM:ALM', &
          upfreq=1, ivar=ivar, initialize=initialize_variables,                 &
          index=ih_nindivs_si_pft)
+
+    call this%set_history_var(vname='FATES_NPLANT_RESPROUT_PF', units='m-2',           &
+         long='total PFT-level number of individual resprouts per m2 land area',        &
+         use_default='active', avgflag='A', vtype=site_pft_r8, hlms='CLM:ALM', &
+         upfreq=1, ivar=ivar, initialize=initialize_variables,                 &
+         index=ih_nindivs_resprout_si_pft)
 
     call this%set_history_var(vname='FATES_NPLANT_SEC_PF', units='m-2',           &
          long='total PFT-level number of individuals per m2 land area, secondary patches',        &
