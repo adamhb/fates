@@ -569,7 +569,8 @@ contains
 	  ! of actual fine root to target fine root ratio.
 
 	  if (currentCohort%resprout == 1) then
-	     call RefreshResproutFlag(currentCohort)
+	     write(fates_log(),*) 'resprouter detected, pft: ',currentCohort%pft 
+             call RefreshResproutFlag(currentCohort)
           endif
 
           ! We want to save these values for the newly recovered cohort as well
