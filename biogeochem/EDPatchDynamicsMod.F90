@@ -1012,7 +1012,7 @@ contains
                                call copy_cohort(currentCohort, nrc)
                                nrc%canopy_layer = 1
                                nrc%canopy_layer_yesterday = 1._r8
-                              
+                               nrc%resprout = 1 
                                ! Reduce number of resprouters in the new patch due to new patch area
                                ! and fraction of cohort resprouting. Note: the doner cohort number 
 			       ! density is reduced after the resprouting routine.
