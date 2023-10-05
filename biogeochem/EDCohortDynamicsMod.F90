@@ -2490,9 +2490,6 @@ contains
      !non-resprouting allometry.
 
      if ((fnrt_c - target_fnrt_c) / fnrt_c < 0.03_r8) then
-        write(fates_log(),*) 'Changing back to non-resprout' 
-        write(fates_log(),*) 'fnrt_c:',fnrt_c 
-        write(fates_log(),*) 'target_fnrt_c:',target_fnrt_c 
         currentCohort%resprout = 0
      endif
 

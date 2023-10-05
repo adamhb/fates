@@ -1019,7 +1019,6 @@ contains
                                nrc%n = currentCohort%n * patch_site_areadis/currentPatch%area * &
                                        currentCohort%frac_resprout
                                
-                               write(fates_log(),*) "nrc_n", nrc%n
 
 			       ! Transfer over the mortality rates for diagnostics
                                ! Caution: absolute mortality numbers will change when cohort number
