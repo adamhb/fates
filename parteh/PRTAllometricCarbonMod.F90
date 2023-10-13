@@ -778,7 +778,7 @@ module PRTAllometricCarbonMod
 
             if(nsteps > max_substeps ) then
                write(fates_log(),fmt=*)    '---~---'
-               write(fates_log(),fmt=*)    'Plant Growth Integrator could not find'
+               write(fates_log(),fmt=*)    'Plant Growth Integrator still could not find'
                write(fates_log(),fmt=*)    'a solution in less than ',max_substeps,' tries.'
                write(fates_log(),fmt=*)    'Aborting!'
                write(fates_log(),fmt=*)    '---~---'
